@@ -47,9 +47,16 @@ const App: React.FC = () => {
     }
 
     try {
-      // Initialize GoogleGenAI client with the API key from environment variables
-      // @ts-ignore: process.env.API_KEY is injected by Vite at build time
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      // Initialize GoogleGenAI client with the API key injected via vite.config.ts
+      // The define plugin replaces process.env.API_KEY with the string.
+      // @ts-ignore
+      const apiKey = process.env.API_KEY;
+
+      if (!apiKey) {
+        throw new Error("کلید API یافت نشد. لطفاً تنظیمات پروژه را بررسی کنید.");
+      }
+
+      const ai = new GoogleGenAI({ apiKey: apiKey });
       
       const prompt = `
         Act as a senior expert Electrical Engineer in Iran with 20 years of experience in residential wiring estimation.
@@ -145,7 +152,9 @@ const App: React.FC = () => {
       let errorMessage = "مشکلی در ارتباط با هوش مصنوعی پیش آمده است.";
       if (err.message) {
           if (err.message.includes("401") || err.message.includes("API key")) {
-             errorMessage = "کلید API معتبر نیست یا یافت نشد (401).";
+             errorMessage = "کلید API معتبر نیست (401).";
+          } else if (err.message.includes("Must be set") || err.message.includes("must be set")) {
+             errorMessage = "کلید API تنظیم نشده است. لطفاً فایل کانفیگ را بررسی کنید.";
           } else if (err.message.includes("503") || err.message.includes("Overloaded")) {
              errorMessage = "سرویس موقتاً در دسترس نیست. لطفاً دوباره تلاش کنید.";
           } else {
@@ -256,7 +265,7 @@ const App: React.FC = () => {
         <footer className="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-6 md:py-8 mt-auto transition-colors duration-300 print:hidden">
           <div className="max-w-6xl mx-auto px-4 text-center">
               <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400">
-                  طراحی شده با ❤️ توسط ایجنت هوشمند Gemini | نسخه 1.1 | <span className="font-bold text-slate-700 dark:text-slate-300">تحلیل آنلاین بازار</span>
+                  طراحی شده با ❤️ توسط ایجنت هوشمند Gemini | نسخه 1.3 | <span className="font-bold text-slate-700 dark:text-slate-300">تحلیل آنلاین بازار</span>
               </p>
           </div>
         </footer>
